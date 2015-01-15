@@ -58,40 +58,46 @@ static void DoBeforeEachAction();
 digit	[0-9]
 letter	[a-zA-Z]
 hexletter [abcdefABCDEF]
-punct[+-*/%<=>!\;,\.\[\]\(\)\{\}]
+punct[+\-*/%<=>!\;,\.\[\]\(\)\{\}]
 %%             /* BEGIN RULES SECTION */
  /* All patterns and actions should be placed between the start and stop
   * %% markers which delimit the Rules section. 
   */ 
-(0x|0X)({digit}|{hexletter})*	  	printf("Found a hex integer constant\n");
-({digit})* 	printf("Found an integer constant\n");
-({digit})+(\.)({digit})*  	printf("Found a double constant\n");
-\"(\\.|[^\\"])*\" 		printf("Found a string constant\n");
-{punct}	printf("Found an operator or punctuation\n");
-void	printf("Found a void\n");
-int		printf("Found an int\n");
-double	printf("found a double\n");
-bool	printf("Found a bool\n");
-string	printf("Found a string\n");
-class	printf("Found a class\n");
-interface	printf("Found a interface\n");
-null	printf("Found a null\n");
-this 	printf("Found a this\n");
-extends	printf("Found a extends\n");
-implements	printf("Found a implements\n");
-for 	printf("Found a for\n");
-while 	printf("Found a while\n");
-if 		printf("Found a if\n");
-else 	printf("Found a else\n");
-return	printf("Found a return\n");
-break	printf("Found a break\n");
-New  	printf("Found a New\n");
-NewArray 	printf("Found a NewArray\n");
-true	printf("Found a true\n");
-false	printf("Found a false\n");
-({letter})+({letter}|{digit}|_)*	printf("Found an identifier\n");
-\n 	printf("Found a newline\n");
-
+(0x|0X)({digit}|{hexletter})*	  	yylval.integerConstant = atoi(yytext); return T_IntConstant;
+({digit})* 							yylval.integerConstant = atoi(yytext); return T_IntConstant;
+({digit})+(\.)({digit})*  			yylval.doubleConstant = atof(yytext); return T_DoubleConstant;
+\"(\\.|[^\\"])*\" 					yylval.stringConstant = yytext; return T_StringConstant;
+\<\=								return T_LessEqual;
+\>\=								return T_GreaterEqual;
+\=\=								return T_Equal;
+\!\=								return T_NotEqual;
+\&\& 								return T_And;
+\|\| 								return T_Or;
+void								return T_Void;
+int									return T_Int;
+double								return T_Double;
+bool								return T_Bool;
+string								return T_String;
+class								return T_Class;
+interface							return T_Interface;
+null								return T_Null;
+this 								return T_This;
+extends								return T_Extends;
+implements							return T_Implements;
+for 								return T_For;
+while 								return T_While;
+if 									return T_If;
+else 								return T_Else;
+return								return T_Return;
+break								return T_Break;
+New  								return T_New;
+NewArray 							return T_NewArray;
+true								yylval.boolConstant = true; return T_BoolConstant;
+false								yylval.boolConstant = false; return T_BoolConstant;
+({letter})+({letter}|{digit}|_)*	return T_Identifier;
+.									printf("found something else\n");
+\n 									/*printf("newline;*/
+	
 %%
 /* The closing %% above marks the end of the Rules section and the beginning
  * of the User Subroutines section. All text from here to the end of the
