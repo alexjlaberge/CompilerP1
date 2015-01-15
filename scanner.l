@@ -99,6 +99,7 @@ true								updatePos(); yylval.boolConstant = true; return T_BoolConstant;
 false								updatePos(); yylval.boolConstant = false; return T_BoolConstant;
 ({letter})+({letter}|{digit}|_)*	updatePos(); return T_Identifier;
 \n 									columnNumber = 1; lineNumber++;
+" "									updatePos();
 .									updatePos(); return *yytext;
 	
 %%
@@ -154,7 +155,7 @@ void updatePos()
 {
 	yylloc.first_line = lineNumber;
 	yylloc.first_column = columnNumber;
-	columnNumber += (strlen(yytext)-1);
+	columnNumber += (strlen(yytext));
 	yylloc.last_line = lineNumber;
-	yylloc.last_column = columnNumber;
+	yylloc.last_column = columnNumber - 1;
 }
