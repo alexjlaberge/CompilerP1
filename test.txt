@@ -1,4 +1,4 @@
-"Should be a string"
+"Should be a string" "Second String"
 12.
 0x12
 12

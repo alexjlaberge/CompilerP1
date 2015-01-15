@@ -16,6 +16,8 @@
 #include "utility.h" // for PrintDebug()
 #include "errors.h"
 
+void updatePos();
+
 /* Global variable: yylval
  * -----------------------
  * This global variable is how we get attribute information about the token
@@ -25,6 +27,7 @@
  * produced by Yacc, but for now, we declare it manually.
  */
 YYSTYPE yylval;  // manually declared for pp1, later Yacc provides
+int lineNumber = 1, columnNumber = 1;
 
 /* Global variable: yylloc
  * -----------------------
@@ -63,40 +66,40 @@ punct[+\-*/%<=>!\;,\.\[\]\(\)\{\}]
  /* All patterns and actions should be placed between the start and stop
   * %% markers which delimit the Rules section. 
   */ 
-(0x|0X)({digit}|{hexletter})*	  	yylval.integerConstant = atoi(yytext); return T_IntConstant;
-({digit})* 							yylval.integerConstant = atoi(yytext); return T_IntConstant;
-({digit})+(\.)({digit})*  			yylval.doubleConstant = atof(yytext); return T_DoubleConstant;
-\"(\\.|[^\\"])*\" 					yylval.stringConstant = yytext; return T_StringConstant;
-\<\=								return T_LessEqual;
-\>\=								return T_GreaterEqual;
-\=\=								return T_Equal;
-\!\=								return T_NotEqual;
-\&\& 								return T_And;
-\|\| 								return T_Or;
-void								return T_Void;
-int									return T_Int;
-double								return T_Double;
-bool								return T_Bool;
-string								return T_String;
-class								return T_Class;
-interface							return T_Interface;
-null								return T_Null;
-this 								return T_This;
-extends								return T_Extends;
-implements							return T_Implements;
-for 								return T_For;
-while 								return T_While;
-if 									return T_If;
-else 								return T_Else;
-return								return T_Return;
-break								return T_Break;
-New  								return T_New;
-NewArray 							return T_NewArray;
-true								yylval.boolConstant = true; return T_BoolConstant;
-false								yylval.boolConstant = false; return T_BoolConstant;
-({letter})+({letter}|{digit}|_)*	return T_Identifier;
-.									printf("found something else\n");
-\n 									/*printf("newline;*/
+(0x|0X)({digit}|{hexletter})*	  	updatePos(); yylval.integerConstant = strtol(yytext, NULL, 16); return T_IntConstant;
+({digit})* 							updatePos(); yylval.integerConstant = atoi(yytext); return T_IntConstant;
+({digit})+(\.)({digit})*  			updatePos(); yylval.doubleConstant = atof(yytext); return T_DoubleConstant;
+\"(\\.|[^\\"])*\" 					updatePos(); yylval.stringConstant = yytext; return T_StringConstant;
+\<\=								updatePos(); return T_LessEqual;
+\>\=								updatePos(); return T_GreaterEqual;
+\=\=								updatePos(); return T_Equal;
+\!\=								updatePos(); return T_NotEqual;
+\&\& 								updatePos(); return T_And;
+\|\| 								updatePos(); return T_Or;
+void								updatePos(); return T_Void;
+int									updatePos(); return T_Int;
+double								updatePos(); return T_Double;
+bool								updatePos(); return T_Bool;
+string								updatePos(); return T_String;
+class								updatePos(); return T_Class;
+interface							updatePos(); return T_Interface;
+null								updatePos(); return T_Null;
+this 								updatePos(); return T_This;
+extends								updatePos(); return T_Extends;
+implements							updatePos(); return T_Implements;
+for 								updatePos(); return T_For;
+while 								updatePos(); return T_While;
+if 									updatePos(); return T_If;
+else 								updatePos(); return T_Else;
+return								updatePos(); return T_Return;
+break								updatePos(); return T_Break;
+New  								updatePos(); return T_New;
+NewArray 							updatePos(); return T_NewArray;
+true								updatePos(); yylval.boolConstant = true; return T_BoolConstant;
+false								updatePos(); yylval.boolConstant = false; return T_BoolConstant;
+({letter})+({letter}|{digit}|_)*	updatePos(); return T_Identifier;
+\n 									columnNumber = 1; lineNumber++;
+.									updatePos(); return *yytext;
 	
 %%
 /* The closing %% above marks the end of the Rules section and the beginning
@@ -131,4 +134,27 @@ void InitScanner()
  * to group code common to all actions.
  */
 static void DoBeforeEachAction()
-{}
+{
+	/*printf("STRING LENGTH %d\n", (int)strlen(yytext));
+	columnNumber += strlen(yytext);
+	if(columnNumber == 1)
+	{
+
+	}
+	if(strcmp(yytext, "\n"))
+	{
+		yylloc.first_line = yylloc.last_line;
+		yylloc.first_column = yylloc.last_column;
+		yylloc.last_line = lineNumber;
+		yylloc.last_column = columnNumber;
+	}*/
+}
+
+void updatePos()
+{
+	yylloc.first_line = lineNumber;
+	yylloc.first_column = columnNumber;
+	columnNumber += (strlen(yytext)-1);
+	yylloc.last_line = lineNumber;
+	yylloc.last_column = columnNumber;
+}
