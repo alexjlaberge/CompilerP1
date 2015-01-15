@@ -62,16 +62,17 @@ static void DoBeforeEachAction();
 digit	[0-9]
 letter	[a-zA-Z]
 hexletter [abcdefABCDEF]
-punct[+\-*/%<=>!\;,\.\[\]\(\)\{\}]
+badpunct	[$@^&~'?]
+goodpunct	[=!><\{\}\(\)\[\]\+-\.\\\/]
 %%             /* BEGIN RULES SECTION */
  /* All patterns and actions should be placed between the start and stop
   * %% markers which delimit the Rules section. 
   */ 
 \/\/.*\n					 		updatePos();
 (\/\*)(.|\n)*(\*\/)					updatePos();
-(0x|0X)({digit}|{hexletter})*	  	updatePos(); yylval.integerConstant = strtol(yytext, NULL, 16); return T_IntConstant;
+(0x|0X)({digit}|{hexletter})+	  	updatePos(); yylval.integerConstant = strtol(yytext, NULL, 16); return T_IntConstant;
 ({digit})* 							updatePos(); yylval.integerConstant = atoi(yytext); return T_IntConstant;
-({digit})+(\.)({digit})*  			updatePos(); yylval.doubleConstant = atof(yytext); return T_DoubleConstant;
+({digit})+(\.)({digit})*((E(\+|-)?{digit}+)|(e(\+|-)?{digit}+))?  			updatePos(); yylval.doubleConstant = atof(yytext); return T_DoubleConstant;
 \"(\\.|[^\\"])*\" 					updatePos(); yylval.stringConstant = yytext; return T_StringConstant;
 \<\=								updatePos(); return T_LessEqual;
 \>\=								updatePos(); return T_GreaterEqual;
@@ -100,10 +101,11 @@ New  								updatePos(); return T_New;
 NewArray 							updatePos(); return T_NewArray;
 true								updatePos(); yylval.boolConstant = true; return T_BoolConstant;
 false								updatePos(); yylval.boolConstant = false; return T_BoolConstant;
-({letter})+({letter}|{digit}|_)*	updatePos(); strcpy(yylval.identifier, yytext); return T_Identifier;
+({letter})+({letter}|{digit}|_)*	updatePos(); strncpy(yylval.identifier, yytext, sizeof(yylval.identifier)-1); if(strlen(yytext) > 31){ ReportError a; a.LongIdentifier(&yylloc, yytext);} return T_Identifier;
 \n 									columnNumber = 1; lineNumber++;
 " "									updatePos();
-.									updatePos(); return *yytext;	
+{goodpunct}							updatePos(); return *yytext;
+.									updatePos(); ReportError a; a.UnrecogChar(&yylloc, *yytext);	
 %%
 /* The closing %% above marks the end of the Rules section and the beginning
  * of the User Subroutines section. All text from here to the end of the
@@ -148,6 +150,7 @@ void updatePos()
 	columnNumber += (strlen(yytext));
 	yylloc.last_line = lineNumber;
 	yylloc.last_column = columnNumber - 1;
+
 }
 
 void countNewLines()

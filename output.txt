@@ -1,1 +1,4 @@
-"all done!"  line 16 cols 1-11 is T_StringConstant (value = "all done!")
+"this is not a
+ valid string constant" line 4 cols 1-38 is T_StringConstant (value = "this is not a
+ valid string constant")
+"this is okay, though" line 6 cols 1-22 is T_StringConstant (value = "this is okay, though")
