@@ -105,7 +105,7 @@ NewArray 							updatePos(); return T_NewArray;
 true								updatePos(); yylval.boolConstant = true; return T_BoolConstant;
 false								updatePos(); yylval.boolConstant = false; return T_BoolConstant;
 ({letter})+({letter}|{digit}|_)*	updatePos(); strncpy(yylval.identifier, yytext, sizeof(yylval.identifier)-1); if(strlen(yytext) > 31){ a.LongIdentifier(&yylloc, yytext);} return T_Identifier;
-\n 									columnNumber = 1; lineNumber++;
+\n 									updatePos(); 
 " "									updatePos();
 {goodpunct}							updatePos(); return *yytext;
 .									updatePos(); a.UnrecogChar(&yylloc, *yytext);	
@@ -147,10 +147,9 @@ static void DoBeforeEachAction()
 
 void updatePos()
 {
-	countNewLines();
 	yylloc.first_line = lineNumber;
 	yylloc.first_column = columnNumber;
-	columnNumber += (strlen(yytext));
+	countNewLines();
 	yylloc.last_line = lineNumber;
 	yylloc.last_column = columnNumber - 1;
 
@@ -162,8 +161,12 @@ void countNewLines()
 	int count = 0;
 	while(count < test.size())
 	{
+		columnNumber++;
 		if(test[count] == '\n')
+		{
+			columnNumber = 1;
 			lineNumber++;
+		}
 		count++;
 	}
 }
