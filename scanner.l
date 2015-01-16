@@ -71,8 +71,6 @@ stringchar[]
   * %% markers which delimit the Rules section. 
   */ 
 \"[^"]*(\n)							updatePos(); a.UntermString(&yylloc, yytext);
-\/\/.*\n					 		updatePos();
-(\/\*)(.|\n)*(\*\/)					updatePos();
 (0x|0X)({digit}|{hexletter})+	  	updatePos(); yylval.integerConstant = strtol(yytext, NULL, 16); return T_IntConstant;
 ({digit})* 							updatePos(); yylval.integerConstant = atoi(yytext); return T_IntConstant;
 ({digit})+(\.)({digit})*((E(\+|-)?{digit}+)|(e(\+|-)?{digit}+))?  			updatePos(); yylval.doubleConstant = atof(yytext); return T_DoubleConstant;
