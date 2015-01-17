@@ -30,7 +30,7 @@ Map defines;
 \/\/.*\n
 (\/\*)(.|\n)*(\*\/)
 [ ]*\#define[ ][A-Z]+[ ].*$ define();
-.*\#.*$ expand();
+\#[A-Z]+ expand();
 
 %%
 
@@ -53,5 +53,14 @@ void define()
 
 void expand()
 {
-    return;
+    string key = string(yytext + 1);
+
+    if (defines[key].size() > 0)
+    {
+        printf("%s", defines[key].c_str());
+    }
+    else
+    {
+        printf("ERROR: Invalid directive\n");
+    }
 }
