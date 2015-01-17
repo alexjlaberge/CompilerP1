@@ -9,3 +9,4 @@ lex.yy.o
 libyywrap.o
 main.o
 utility.o
+*.swp
