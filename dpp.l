@@ -20,6 +20,10 @@ struct yyltype yylloc;
 
 void define();
 void expand();
+ReportError a;
+void updatePos();
+void countNewLines();
+int lineNumber = 1, columnNumber = 1;
 
 Map defines;
 
@@ -27,8 +31,12 @@ Map defines;
 
 %%
 
-[ ]*\#define[ ][A-Z]+[ ].*$ define();
-\#[A-Z]+ expand();
+\/\/.*                                          updatePos();
+(\/\*)([^\*\/]|\*[^\/]|\/.*)*(\*\/)             updatePos();
+[ ]*\#define[ ][A-Z]+[ ].*$                     updatePos(); define();
+\#[A-Z]+                                        updatePos(); expand();   
+[ ]*\#define[ ](.)+[ ](.)+                      a.InvalidDirective(lineNumber); updatePos();
+\n                                              updatePos();
 
 %%
 
@@ -59,6 +67,35 @@ void expand()
     }
     else
     {
-        printf("ERROR: Invalid directive\n");
+        a.InvalidDirective(lineNumber);
+        //printf("ERROR: Invalid directive\n");
+
+    }
+}
+
+void updatePos()
+{
+    yylloc.first_line = lineNumber;
+    yylloc.first_column = columnNumber;
+    countNewLines();
+    yylloc.last_line = lineNumber;
+    yylloc.last_column = columnNumber - 1;
+
+}
+
+void countNewLines()
+{
+    string test = yytext;
+    int count = 0;
+    while(count < test.size())
+    {
+        columnNumber++;
+        if(test[count] == '\n')
+        {
+            printf("\n");
+            columnNumber = 1;
+            lineNumber++;
+        }
+        count++;
     }
 }
