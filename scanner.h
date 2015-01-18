@@ -76,6 +76,8 @@ extern char *yytext;      // Text of lexeme just scanned
 int yylex();              // Defined in the generated lex.yy.c file
 void yyrestart(FILE *fp); // ditto
 
+void updatePos();
+void countNewLines();
 
 void InitScanner();                 // Defined in scanner.l user subroutines
  

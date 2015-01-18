@@ -27,8 +27,6 @@ Map defines;
 
 %%
 
-\/\/.*\n
-(\/\*)(.|\n)*(\*\/)
 [ ]*\#define[ ][A-Z]+[ ].*$ define();
 \#[A-Z]+ expand();
 
