@@ -32,7 +32,8 @@ Map defines;
 %%
 
 \/\/.*                                          updatePos();
-(\/\*)([^\*\/]|\*[^\/]|\/.*)*(\*\/)             updatePos();
+(\/\*)([^\*\/]|\*[^\/]|\/)*(\*\/)             updatePos();
+(\/\*)([^\*\/]|\*[^\/]|\/)*                  a.UntermComment(); a.Formatted(&yylloc, yytext);
 [ ]*\#define[ ][A-Z]+[ ].*$                     updatePos(); define();
 \#[A-Z]+                                        updatePos(); expand();   
 [ ]*\#define[ ](.)+[ ](.)+                      a.InvalidDirective(lineNumber); updatePos();
