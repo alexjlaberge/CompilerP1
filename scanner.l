@@ -49,6 +49,11 @@ struct yyltype yylloc; // manually dclared for pp1, later Yacc provides
 static void DoBeforeEachAction(); 
 #define YY_USER_ACTION DoBeforeEachAction();
 
+/**
+ * Chomps newlines off the right side of strings
+ */
+static char * chomp(char *str);
+
 %}
 
  /* The section before the first %% is the Definitions section of the lex
@@ -68,7 +73,7 @@ stringchar[]
  /* All patterns and actions should be placed between the start and stop
   * %% markers which delimit the Rules section. 
   */ 
-\"[^"]*(\n)							updatePos(); a.UntermString(&yylloc, yytext);
+\"[^"]*$							updatePos(); a.UntermString(&yylloc, chomp(yytext));
 (0x|0X)({digit}|{hexletter})+	  	updatePos(); yylval.integerConstant = strtol(yytext, NULL, 16); return T_IntConstant;
 ({digit})* 							updatePos(); yylval.integerConstant = atoi(yytext); return T_IntConstant;
 ({digit})+(\.)({digit})*((E(\+|-)?{digit}+)|(e(\+|-)?{digit}+))?  			updatePos(); yylval.doubleConstant = atof(yytext); return T_DoubleConstant;
@@ -165,4 +170,17 @@ void countNewLines()
 		}
 		count++;
 	}
+}
+
+static char * chomp(char *str)
+{
+    size_t len = strlen(str) - 1;
+
+    while (str[len] == '\n')
+    {
+        str[len] = 0;
+        len--;
+    }
+
+    return str;
 }
