@@ -52,7 +52,7 @@ static void DoBeforeEachAction();
 /**
  * Chomps newlines off the right side of strings
  */
-static char * chomp(char *str);
+static char * chomp(const char *str);
 
 %}
 
@@ -73,7 +73,7 @@ stringchar[]
  /* All patterns and actions should be placed between the start and stop
   * %% markers which delimit the Rules section. 
   */ 
-\"[^"]*$							updatePos(); a.UntermString(&yylloc, chomp(yytext));
+\"[^"\n]*$							updatePos(); a.UntermString(&yylloc, chomp(yytext));
 (0x|0X)({digit}|{hexletter})+	  	updatePos(); yylval.integerConstant = strtol(yytext, NULL, 16); return T_IntConstant;
 ({digit})* 							updatePos(); yylval.integerConstant = atoi(yytext); return T_IntConstant;
 ({digit})+(\.)({digit})*((E(\+|-)?{digit}+)|(e(\+|-)?{digit}+))?  			updatePos(); yylval.doubleConstant = atof(yytext); return T_DoubleConstant;
@@ -106,9 +106,10 @@ NewArray 							updatePos(); return T_NewArray;
 true								updatePos(); yylval.boolConstant = true; return T_BoolConstant;
 false								updatePos(); yylval.boolConstant = false; return T_BoolConstant;
 ({letter})+({letter}|{digit}|_)*	updatePos(); strncpy(yylval.identifier, yytext, sizeof(yylval.identifier)-1); if(strlen(yytext) > 31){ a.LongIdentifier(&yylloc, yytext);} return T_Identifier;
-\n 									updatePos(); 
+\n 									updatePos();
 " "									updatePos();
 {goodpunct}							updatePos(); return *yytext;
+\t                                                              updatePos();
 .									updatePos(); a.UnrecogChar(&yylloc, *yytext);	
 %%
 /* The closing %% above marks the end of the Rules section and the beginning
@@ -153,7 +154,6 @@ void updatePos()
 	countNewLines();
 	yylloc.last_line = lineNumber;
 	yylloc.last_column = columnNumber - 1;
-
 }
 
 void countNewLines()
@@ -172,8 +172,9 @@ void countNewLines()
 	}
 }
 
-static char * chomp(char *str)
+static char * chomp(const char *to_chomp)
 {
+    char *str = strdup(to_chomp);
     size_t len = strlen(str) - 1;
 
     while (str[len] == '\n')

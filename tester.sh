@@ -4,6 +4,6 @@
 for input in `ls samples/*.frag samples/*.decaf`
 do
         echo -ne "Testing ${input}..."
-        ./dcc < ${input} 2>&1 | diff -q \
+        ./dcc < ${input} 2>&1 | diff -aq \
                 `echo ${input} | sed -e "s/\..*/\.out/"` - && echo "PASS"
 done
