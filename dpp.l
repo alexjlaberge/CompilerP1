@@ -34,11 +34,11 @@ Map defines;
 \/\/.*                                          updatePos();
 (\/\*)([^\*\/]|\*[^\/]|\/)*(\*\/)               updatePos();
 (\/\*)([^\*\/]|\*[^\/]|\/)*                     a.UntermComment();
-[ ]*\#define[ ][A-Z]+[ ].*$                     updatePos(); define();
+[ ]*\#define[ ][A-Z]+[ ].*                 updatePos(); define();
 \#[A-Z]+                                        updatePos(); expand();   
-[ ]*\#define[ ](.)+[ ](.)+                      a.InvalidDirective(lineNumber); updatePos();
+[ ]*\#define[ ][^A-Z]+[ ].*                    a.InvalidDirective(lineNumber); updatePos();        
 \n                                              updatePos();
-
+\"([^"\n])*\"                                   printf("%s",yytext); updatePos();
 %%
 
 void define()
