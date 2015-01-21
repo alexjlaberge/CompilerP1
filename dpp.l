@@ -35,7 +35,7 @@ Map defines;
 (\/\*)([^\*\/]|\*[^\/]|\/)*(\*\/)               updatePos();
 (\/\*)([^\*\/]|\*[^\/]|\/)*                     a.UntermComment();
 [ ]*\#define[ ][A-Z]+[ ].*                 updatePos(); define();
-\#[A-Z]+                                        updatePos(); expand();   
+\#[A-Z]*                                        updatePos(); expand();
 [ ]*\#define[ ][^A-Z]+[ ].*                    a.InvalidDirective(lineNumber); updatePos();        
 \n                                              updatePos();
 \"([^"\n])*\"                                   printf("%s",yytext); updatePos();
@@ -62,15 +62,13 @@ void expand()
 {
     string key = string(yytext + 1);
 
-    if (defines[key].size() > 0)
+    if (key.size() > 0 && defines[key].size() > 0)
     {
         printf("%s", defines[key].c_str());
     }
     else
     {
         a.InvalidDirective(lineNumber);
-        //printf("ERROR: Invalid directive\n");
-
     }
 }
 
